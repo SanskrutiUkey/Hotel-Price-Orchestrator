@@ -33,29 +33,33 @@ The Express API receives hotel search requests and delegates to a Temporal workf
 
 ## Setup & Run
 
-### Docker (Recommended)
+### Docker Deployment (Recommended)
 
 ```bash
-docker compose up --build
+# Clone the repository & launch all services
+docker compose up -d --build
 ```
 
-This starts 5 services:
-- **api** (port 3000) — Express REST API
-- **worker** — Temporal worker processing workflows
-- **redis** (port 6379) — Cache layer
-- **temporal** (port 7233) — Temporal server
-- **temporal-ui** (port 8080) — Temporal Web UI
+This starts all 5 containers required for production/local deployment:
+- **api** (`http://localhost:3000`) — Express REST API server (`node:20-slim`)
+- **worker** — Temporal worker process running activities and workflows (`node:20-slim`)
+- **redis** (`localhost:6379`) — Redis caching layer for price index & hotel payload storage
+- **temporal** (`localhost:7233`) — Temporal server engine using `temporalio/admin-tools` CLI dev mode
+- **temporal-ui** (`http://localhost:8080`) — Temporal Web UI workflow monitoring dashboard
+
+> **Note on Base Image:** The Dockerfile uses `node:20-slim` to ensure native `glibc` library compatibility required by the `@temporalio/core-bridge` Rust native bindings.
 
 ### Local Development
 
 ```bash
-# Terminal 1: Start infrastructure
-docker compose up redis temporal
+# Terminal 1: Start Redis & Temporal services in background
+docker compose up -d redis temporal
 
-# Terminal 2: Start worker
+# Terminal 2: Install dependencies & run Temporal Worker
+npm install
 npm run dev:worker
 
-# Terminal 3: Start API server
+# Terminal 3: Run API Server with hot reload
 npm run dev
 ```
 
